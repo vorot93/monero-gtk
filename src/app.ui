@@ -5,19 +5,19 @@
   <object class="GtkListStore" id="ReceiveAddresses"/>
   <object class="GtkListStore" id="Transactions">
     <columns>
-      <!-- column-name direction -->
+      <!-- column-name txid -->
+      <column type="gchararray"/>
+      <!-- column-name address -->
+      <column type="gchararray"/>
+      <!-- column-name amount -->
+      <column type="gdouble"/>
+      <!-- column-name direction_icon -->
+      <column type="gchararray"/>
+      <!-- column-name block_num -->
+      <column type="guint64"/>
+      <!-- column-name date -->
       <column type="gchararray"/>
     </columns>
-  </object>
-  <object class="GtkImage" id="image1">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">edit-copy-symbolic</property>
-  </object>
-  <object class="GtkImage" id="image2">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">application-exit-symbolic</property>
   </object>
   <object class="GtkApplicationWindow" id="MainWindow">
     <property name="can_focus">False</property>
@@ -31,7 +31,13 @@
           <object class="GtkButton">
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="image">image2</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">application-exit-symbolic</property>
+              </object>
+            </child>
           </object>
         </child>
         <child>
@@ -55,7 +61,7 @@
           </packing>
         </child>
         <child type="title">
-          <object class="GtkLabel" id="ui_title">
+          <object class="GtkLabel" id="MainTitle">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Wallet | Balance: 0 | Unlocked Balance: 0</property>
@@ -69,12 +75,49 @@
         <property name="can_focus">True</property>
         <property name="shadow_type">in</property>
         <child>
-          <object class="GtkTreeView" id="transaction_list_view">
+          <object class="GtkTreeView" id="TransactionView">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="model">Transactions</property>
             <child internal-child="selection">
               <object class="GtkTreeSelection"/>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn">
+                <property name="title" translatable="yes">Amount</property>
+                <child>
+                  <object class="GtkCellRendererPixbuf"/>
+                  <attributes>
+                    <attribute name="icon-name">3</attribute>
+                  </attributes>
+                </child>
+                <child>
+                  <object class="GtkCellRendererText"/>
+                  <attributes>
+                    <attribute name="text">2</attribute>
+                  </attributes>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn">
+                <property name="title" translatable="yes">Height</property>
+                <child>
+                  <object class="GtkCellRendererText"/>
+                  <attributes>
+                    <attribute name="text">4</attribute>
+                  </attributes>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn">
+                <property name="title" translatable="yes">Date</property>
+                <property name="sort_column_id">2</property>
+                <child>
+                  <object class="GtkCellRendererText"/>
+                </child>
+              </object>
             </child>
           </object>
         </child>
@@ -93,7 +136,7 @@
         <property name="margin_top">15</property>
         <property name="margin_bottom">15</property>
         <child>
-          <object class="GtkDrawingArea" id="receive_qrcode_area">
+          <object class="GtkDrawingArea" id="ReceiveQrcodeArea">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="hexpand">True</property>
@@ -101,7 +144,7 @@
           </object>
           <packing>
             <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
+            <property name="top_attach">2</property>
           </packing>
         </child>
         <child>
@@ -117,14 +160,20 @@
                 <property name="can_focus">False</property>
                 <property name="column_spacing">5</property>
                 <child>
-                  <object class="GtkButton" id="copy_receive_address">
+                  <object class="GtkButton" id="CopyReceiveAddress">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="image">image1</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="icon_name">edit-copy-symbolic</property>
+                      </object>
+                    </child>
                   </object>
                   <packing>
-                    <property name="left_attach">1</property>
+                    <property name="left_attach">2</property>
                     <property name="top_attach">0</property>
                   </packing>
                 </child>
@@ -140,6 +189,24 @@
                     <property name="top_attach">0</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkButton" id="MakeSubaddress">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="icon_name">list-add-symbolic</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -147,7 +214,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="receive_amount">
+              <object class="GtkEntry" id="ReceiveAmount">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="placeholder_text" translatable="yes">Amount</property>
@@ -161,7 +228,7 @@
           </object>
           <packing>
             <property name="left_attach">0</property>
-            <property name="top_attach">2</property>
+            <property name="top_attach">0</property>
           </packing>
         </child>
         <child>
@@ -192,7 +259,7 @@
         <property name="row_spacing">5</property>
         <property name="column_spacing">5</property>
         <child>
-          <object class="GtkEntry" id="send_address">
+          <object class="GtkEntry" id="SendAddress">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="placeholder_text" translatable="yes">Address</property>
@@ -203,7 +270,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="send_amount">
+          <object class="GtkEntry" id="SendAmount">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="placeholder_text" translatable="yes">Amount</property>
@@ -215,7 +282,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="send_funds">
+          <object class="GtkButton" id="DoSend">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>

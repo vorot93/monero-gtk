@@ -4,6 +4,14 @@ version = "0.1.0"
 authors = ["Artem Vorotnikov <artem@vorotnikov.me>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+derive_more = "*"
+env_logger = "*"
+futures-preview = { version = "0.3.0-alpha.17", features = ["compat"] }
+gio = "*"
+glib = "*"
+gdk = "*"
+gdk-pixbuf = "*"
+gtk = { version = "*", features = ["v3_24"] }
+monero-rpc = { git = "https://github.com/monero-ecosystem/monero-rpc-rs" }
+tokio = "0.1"
